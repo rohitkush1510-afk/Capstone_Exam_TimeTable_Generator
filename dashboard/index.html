@@ -121,23 +121,18 @@
 
   /* ==========================================================
      Design-system layer — builds on the existing stylesheet.
-     The original rules above are kept; these tokens and rules
-     extend them into the dark glassmorphism theme.
      ========================================================== */
   :root {
     color-scheme: dark;
-
-    /* Existing variable names are repointed so old rules inherit the brand */
     --primary: #667eea;
     --primary-dark: #764ba2;
     --bg: #0f172a;
     --card: rgba(17, 24, 39, 0.6);
-    --text: #cbd5e1;              /* slate-300 */
+    --text: #cbd5e1;
     --muted: rgba(203, 213, 225, 0.6);
     --border: rgba(255, 255, 255, 0.08);
     --radius: 16px;
 
-    /* New tokens */
     --secondary: #764ba2;
     --success: #4facfe;
     --warning: #fee140;
@@ -154,7 +149,7 @@
     --grad-success: linear-gradient(135deg, #22d3ee, #4facfe);
   }
 
-  html { min-height: 100%; background: var(--bg); }
+  html { min-height: 100%; background: var(--bg); scroll-behavior: smooth; }
 
   body {
     position: relative;
@@ -165,9 +160,9 @@
     font-size: 0.875rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    padding-top: 96px; /* room for fixed nav */
   }
 
-  /* Breathing background gradients */
   body::before,
   body::after {
     content: '';
@@ -201,7 +196,6 @@
   .card h2 { font-size: 1.25rem; }
   header p { font-size: 0.875rem; }
 
-  /* Glass panels (reuse the existing header/card/stat/slot classes) */
   header, .card, .stat, .slot {
     background: var(--card);
     backdrop-filter: blur(var(--glass-blur));
@@ -292,7 +286,6 @@
   }
   .footer { color: var(--muted); font-size: 0.75rem; }
 
-  /* Task-specific gradient accents */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -308,7 +301,6 @@
   .badge--success { background: var(--grad-success); }
   .text-warning { color: var(--warning); }
 
-  /* Result summary and slot distribution chart */
   .summary {
     display: flex;
     flex-wrap: wrap;
@@ -338,7 +330,171 @@
     margin-inline: auto;
   }
 
-  /* Staggered slide-up entrance */
+  /* ==========================================================
+     NAVIGATION BAR
+     ========================================================== */
+  .navbar {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(calc(100% - 32px), 960px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 10px 18px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, padding 0.3s ease;
+    animation: nav-drop 0.7s var(--ease-out) both;
+  }
+  /* Gradient border ring */
+  .navbar::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--grad-brand);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .navbar.scrolled {
+    background: rgba(15, 23, 42, 0.85);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(102, 126, 234, 0.15);
+    border-color: var(--border-hover);
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--heading);
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  .nav-logo {
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    border-radius: 10px;
+    background: var(--grad-brand);
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.45);
+    font-size: 17px;
+    transition: transform 0.4s var(--ease-out);
+  }
+  .nav-brand:hover .nav-logo { transform: rotate(-12deg) scale(1.08); }
+  .nav-brand span em {
+    font-style: normal;
+    background: var(--grad-success);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-links a {
+    position: relative;
+    display: block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: color 0.25s ease, background 0.25s ease;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 50%; bottom: 3px;
+    width: 0; height: 2px;
+    border-radius: 2px;
+    background: var(--grad-success);
+    transform: translateX(-50%);
+    transition: width 0.3s var(--ease-out);
+  }
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: var(--heading);
+    background: rgba(102, 126, 234, 0.12);
+  }
+  .nav-links a:hover::after,
+  .nav-links a.active::after { width: 40%; }
+
+  .nav-cta {
+    padding: 9px 16px !important;
+    font-size: 0.8125rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { transform: translateY(-1px); }
+
+  .nav-toggle {
+    display: none;
+    width: 40px; height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    position: relative;
+    box-shadow: none;
+  }
+  .nav-toggle:hover { transform: none; box-shadow: none; filter: none; background: rgba(255,255,255,0.12); }
+  .nav-toggle span {
+    position: absolute;
+    left: 50%; width: 18px; height: 2px;
+    background: var(--heading);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: transform 0.3s var(--ease-out), opacity 0.2s, top 0.3s var(--ease-out);
+  }
+  .nav-toggle span:nth-child(1) { top: 14px; }
+  .nav-toggle span:nth-child(2) { top: 19px; }
+  .nav-toggle span:nth-child(3) { top: 24px; }
+  .nav-toggle.open span:nth-child(1) { top: 19px; transform: translateX(-50%) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { top: 19px; transform: translateX(-50%) rotate(-45deg); }
+
+  @media (max-width: 720px) {
+    .nav-toggle { display: block; }
+    .navbar { border-radius: 20px; flex-wrap: wrap; }
+    .nav-links {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      padding-top: 12px;
+      margin-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; animation: slide-up 0.35s var(--ease-out) both; }
+    .nav-links a { padding: 12px 14px; }
+    .nav-links a::after { display: none; }
+    .nav-cta { width: 100%; text-align: center; }
+  }
+
+  /* ==========================================================
+     Entrance animations
+     ========================================================== */
   .container > *, .summary, .chart-panel, .stats > .stat, #result > .slot {
     animation: slide-up 0.6s ease-out both;
   }
@@ -366,8 +522,11 @@
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  @keyframes nav-drop {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
 
-  /* SVG bars grow from the baseline */
   .grow-bar, svg [data-grow='bar'] {
     transform-box: fill-box;
     transform-origin: bottom center;
@@ -378,7 +537,6 @@
     to   { transform: scaleY(1); }
   }
 
-  /* RTL-friendly helper: add dir="rtl" on <html> when needed */
   [dir='rtl'] .align-start { text-align: right; }
   [dir='ltr'] .align-start { text-align: left; }
 
@@ -388,18 +546,39 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+    html { scroll-behavior: auto; }
   }
 </style>
 </head>
 <body>
-<div class="container">
+
+<nav class="navbar" id="navbar">
+  <a href="#top" class="nav-brand">
+    <div class="nav-logo">📅</div>
+    <span>Exam<em>Planner</em></span>
+  </a>
+
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#top" class="active">Home</a></li>
+    <li><a href="#input-card">Input</a></li>
+    <li><a href="#result">Timetable</a></li>
+    <li><a href="#" onclick="loadSample(); return false;">Sample</a></li>
+    <li><a href="#" class="nav-cta-link" onclick="clearAll(); return false;" style="display:none"></a></li>
+  </ul>
+</nav>
+
+<div class="container" id="top">
 
   <header>
     <h1>📅 Exam Timetable Generator</h1>
     <p>Graph coloring with backtracking — subjects that share a student never share a slot.</p>
   </header>
 
-  <div class="card">
+  <div class="card" id="input-card">
     <h2>1. Enter student subjects</h2>
     <p class="hint">One student per line, format: <code>Name: Sub1, Sub2</code></p>
     <textarea id="input" spellcheck="false"></textarea>
@@ -416,7 +595,6 @@
     <p class="empty">Click "Generate Timetable" to see the schedule.</p>
   </div>
 
-  <!-- <div class="footer">Backtracking graph coloring · Subjects sharing a student are conflicts</div> -->
 </div>
 
 <script>
@@ -511,7 +689,6 @@ function run() {
   const subjectCount = Object.keys(graph).length;
   const conflictCount = Object.values(graph).reduce((n, s) => n + s.size, 0) / 2;
 
-  // Per-slot counts feed the SVG chart animated by the growBar keyframes.
   const slotCounts = Array.from({ length: k }, (_, idx) =>
     Object.values(colors).filter(c => c === idx + 1).length);
   const maxCount = Math.max(1, ...slotCounts);
@@ -575,6 +752,31 @@ function clearAll() {
   document.getElementById("result").innerHTML =
     `<h2>2. Your timetable</h2><p class="empty">Input cleared. Enter students to generate a schedule.</p>`;
 }
+
+/* ---------- Navigation behaviour ---------- */
+const navbar = document.getElementById("navbar");
+const navToggle = document.getElementById("navToggle");
+const navLinks = document.getElementById("navLinks");
+
+window.addEventListener("scroll", () => {
+  navbar.classList.toggle("scrolled", window.scrollY > 20);
+}, { passive: true });
+
+navToggle.addEventListener("click", () => {
+  const open = navToggle.classList.toggle("open");
+  navLinks.classList.toggle("open", open);
+  navToggle.setAttribute("aria-expanded", open);
+});
+
+navLinks.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    navLinks.querySelectorAll("a").forEach(a => a.classList.remove("active"));
+    link.classList.add("active");
+    navToggle.classList.remove("open");
+    navLinks.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+  });
+});
 
 document.getElementById("input").value = SAMPLE;
 run();
